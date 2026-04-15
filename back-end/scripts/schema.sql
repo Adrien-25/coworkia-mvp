@@ -1,0 +1,52 @@
+-- Database Schema for Coworkia MVP
+
+CREATE TABLE sites (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE zones (
+    id SERIAL PRIMARY KEY,
+    site_id INTEGER REFERENCES sites(id),
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(10) NOT NULL,
+    type VARCHAR(50) NOT NULL, -- MEETING_ROOM, OPEN_SPACE, PRIVATE_OFFICE
+    capacity INTEGER NOT NULL
+);
+
+CREATE TABLE desks (
+    id SERIAL PRIMARY KEY,
+    zone_id INTEGER REFERENCES zones(id),
+    code VARCHAR(20) NOT NULL UNIQUE -- e.g. AT-A, AT-B
+);
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    role VARCHAR(50) NOT NULL, -- ROLE_USER, ROLE_MANAGER, ROLE_ADMIN
+    fidelity_points INTEGER DEFAULT 0
+);
+
+CREATE TABLE bookings (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    desk_id INTEGER REFERENCES desks(id),
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    status VARCHAR(50) DEFAULT 'CONFIRMED', -- CONFIRMED, CANCELLED
+    price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE invoices (
+    id SERIAL PRIMARY KEY,
+    booking_id INTEGER REFERENCES bookings(id),
+    amount DECIMAL(10, 2) NOT NULL,
+    is_paid BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

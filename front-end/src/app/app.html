@@ -1,0 +1,512 @@
+<div class="dashboard-container" role="document">
+  <a href="#main-content" class="skip-link">Passer au contenu principal</a>
+
+  <!-- REGION POUR ANNONCES VOCALES (Lecteurs d'écran) -->
+  <div aria-live="polite" class="sr-only"
+    style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;">
+    {{ toastMessage() }}
+  </div>
+
+  <div class="toast" *ngIf="toastMessage()">
+    {{ toastMessage() }}
+  </div>
+
+  <!-- LOGIN PAGE -->
+  @if (!isLoggedIn()) {
+  <div class="login-overlay">
+    <main class="login-card" role="form" aria-labelledby="login-title">
+      <header style="text-align: center; margin-bottom: 2.5rem;">
+        <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+          <div class="logo-icon"></div>
+          COWORKIA
+        </div>
+        <h1 id="login-title" style="font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;">
+          {{ authMode() === 'login' ? 'Bienvenue' : 'Créer un compte' }}
+        </h1>
+        <p class="text-muted" style="margin-top: 0.5rem;">
+          {{ authMode() === 'login' ? 'Connectez-vous à votre espace membre' : 'Inscription rapide en quelques champs' }}
+        </p>
+      </header>
+
+      <div class="view-toggle" role="group" aria-label="Changer de mode d'authentification"
+        style="margin-bottom: 1.5rem; justify-content: center;">
+        <button class="toggle-btn" [class.active]="authMode() === 'login'" (click)="switchAuthMode('login')"
+          aria-pressed="authMode() === 'login'">Connexion</button>
+        <button class="toggle-btn" [class.active]="authMode() === 'register'" (click)="switchAuthMode('register')"
+          aria-pressed="authMode() === 'register'">Inscription</button>
+      </div>
+
+      @if (authMode() === 'register') {
+      <div class="auth-name-row">
+        <div class="form-group" style="flex: 1;">
+          <label for="firstName">Prénom</label>
+          <input id="firstName" type="text" class="form-control" [(ngModel)]="registerData.firstName" placeholder="Sarah">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="lastName">Nom</label>
+          <input id="lastName" type="text" class="form-control" [(ngModel)]="registerData.lastName" placeholder="Dubois">
+        </div>
+      </div>
+      }
+
+      @if (authMode() === 'login') {
+      <div class="form-group">
+        <label for="email">Identifiant</label>
+        <input id="email" type="email" class="form-control" [(ngModel)]="loginData.email"
+          placeholder="user@coworkia.com" aria-required="true">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input id="password" type="password" class="form-control" [(ngModel)]="loginData.password"
+          placeholder="••••••••" aria-required="true">
+      </div>
+      } @else {
+      <div class="form-group">
+        <label for="register-email">Identifiant</label>
+        <input id="register-email" type="email" class="form-control" [(ngModel)]="registerData.email"
+          placeholder="user@coworkia.com" aria-required="true">
+      </div>
+
+      <div class="form-group">
+        <label for="register-password">Mot de passe</label>
+        <input id="register-password" type="password" class="form-control" [(ngModel)]="registerData.password"
+          placeholder="••••••••" aria-required="true">
+      </div>
+      }
+
+      @if (authMode() === 'register') {
+      <div class="form-group">
+        <label for="confirm-password">Confirmer le mot de passe</label>
+        <input id="confirm-password" type="password" class="form-control" [(ngModel)]="registerData.confirmPassword"
+          placeholder="••••••••" aria-required="true">
+      </div>
+      }
+
+      <button class="btn-primary" style="width: 100%; padding: 1rem; margin-top: 1.5rem; font-size: 1.1rem;"
+        (click)='authMode() === "login" ? handleLogin() : handleRegister()'
+        [attr.aria-label]="authMode() === 'login' ? 'Se connecter à l application' : 'Créer un compte utilisateur'">
+        {{ authMode() === 'login' ? 'Se connecter' : 'Créer un compte' }}
+      </button>
+
+      @if (authMode() === 'login') {
+      <footer
+        style="margin-top: 3rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+        <div class="text-muted" style="text-align: center; font-size: 0.85rem; margin: 0;">
+          <strong>Comptes de démonstration</strong><br>
+          <div style="margin-top: 10px;">
+            <span style="opacity: 0.8;">Sarah (Freelance)</span><br>
+            <code
+              style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 4px;">user@coworkia.com / password</code>
+          </div>
+          <div style="margin-top: 10px;">
+            <span style="opacity: 0.8;">Julie (Manager)</span><br>
+            <code
+              style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-top: 4px;">manager@coworkia.com / password</code>
+          </div>
+        </div>
+      </footer>
+      }
+    </main>
+  </div>
+  } @else {
+  <!-- SIDEBAR (Accessible) -->
+  <aside class="sidebar" role="navigation" aria-label="Menu principal">
+    <div class="logo">
+      <div class="logo-icon" aria-hidden="true"></div>
+      COWORKIA
+    </div>
+    <nav>
+      <div class="nav-item active" role="menuitem" (click)="isManagerView.set(false)"
+        style="cursor: pointer; font-weight: 700;">Dashboard</div>
+      <a href="#plan-title" class="nav-item" role="menuitem"
+        style="text-decoration: none; color: inherit; margin-left: 1.5rem; font-size: 0.9rem; border-left: 1px solid rgba(255,255,255,0.1); border-radius: 0 12px 12px 0;">Espaces</a>
+      <a href="#table-title" class="nav-item" role="menuitem"
+        style="text-decoration: none; color: inherit; margin-left: 1.5rem; font-size: 0.9rem; border-left: 1px solid rgba(255,255,255,0.1); border-radius: 0 12px 12px 0;">Mes
+        Réservations</a>
+
+      <div class="nav-item" role="menuitem" (click)="handleLogout()"
+        style="margin-top: auto; color: #ef4444; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right: 0.5rem;">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Déconnexion
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="main-content" class="main-content" role="main">
+    <header class="header">
+      <div>
+        <h1>Bienvenue, {{ userName() }} <span *ngIf="isManagerView()" class="manager-badge" role="status">Manager</span>
+        </h1>
+        <p class="text-muted">{{ isManagerView() ? 'Supervision du site Paris République' : 'Prête à travailler
+          aujourd\'hui ?' }}</p>
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <div class="view-toggle" role="group" aria-label="Changer de vue" *ngIf="userProfile()?.role !== 'ROLE_USER'">
+          <button class="toggle-btn" [class.active]="!isManagerView()" (click)="toggleView(false)"
+            aria-pressed="!isManagerView()">Freelance</button>
+          <button class="toggle-btn" [class.active]="isManagerView()" (click)="toggleView(true)"
+            aria-pressed="isManagerView()">Manager</button>
+        </div>
+        <button class="toggle-btn" (click)="openProfileModal()" aria-haspopup="dialog" aria-controls="profile-modal">
+          Mon profil
+        </button>
+        <button class="btn-primary" (click)="openBookingModal()" aria-haspopup="dialog" aria-controls="booking-modal">
+          + Nouvelle Réservation
+        </button>
+      </div>
+    </header>
+
+    <!-- STATS GRID -->
+    <div class="stats-grid" role="region" aria-label="Statistiques clés">
+      <div class="stat-card">
+        <div class="stat-label">{{ isManagerView() ? 'Occupation' : 'Abonnement' }}</div>
+        <div class="stat-value">{{ isManagerView() ? (managerStats().occupation + '%') : 'Actif' }}</div>
+        <div class="text-muted">{{ isManagerView() ? (managerStats().free + ' postes libres') : 'Membre Premium' }}
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">{{ isManagerView() ? 'CA Journée' : 'Prochaine Résa' }}</div>
+        <div class="stat-value">
+          {{ isManagerView() ? (managerStats().revenue + ' €') : (nextBooking() ? (nextBooking().startTime | date:'dd
+          MMM HH:mm') : 'Aucune') }}
+        </div>
+        <div class="text-muted">
+          {{ isManagerView() ? 'Calculé en direct' : (nextBooking() ? nextBooking().desk.code + ' - ' +
+          nextBooking().desk.zone.name : 'Prête à réserver ?') }}
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Réservations</div>
+        <div class="stat-value">{{ bookings().length }}</div>
+        <div class="text-muted">Historique complet</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Points Fidélité</div>
+        <div class="stat-value">{{ userPoints() }} pts</div>
+        <div class="text-muted">{{ (userPoints() / 10) | number:'1.1-1' }}€ de cagnotte</div>
+      </div>
+    </div>
+
+    <!-- ZONES AVAILABILITY (Requirement: Plan & Disponibilités par zone) -->
+    <section class="booking-section" style="margin-bottom: 2rem;" *ngIf="zones().length > 0">
+      <h3 id="plan-title">Plan du site & Disponibilités par zone</h3>
+      <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        @for (z of zones(); track z.code) {
+        <div class="stat-card" style="padding: 1.2rem; border-left: 4px solid var(--primary);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div style="font-weight: 700; font-size: 1rem;">{{ z.name }}</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Code: {{ z.code }}</div>
+            </div>
+            <div [class.badge-success]="z.capacity - z.occupied > 0" class="badge-success"
+              style="font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px;">
+              {{ z.capacity - z.occupied }} libres
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+              <div [style.width]="(z.occupied / z.capacity * 100) + '%'"
+                style="height: 100%; background: var(--primary); transition: width 0.5s;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.7rem;"
+              class="text-muted">
+              <span>{{ z.occupied }} / {{ z.capacity }} postes</span>
+              <span>{{ (z.occupied / z.capacity * 100) | number:'1.0-0' }}%</span>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </section>
+
+    <section class="booking-section" *ngIf="isManagerView()">
+      <h3 id="history-title">Historique d'occupation (périodes passées)</h3>
+
+      <div class="manager-filters-grid" style="margin-top: 1rem; margin-bottom: 1rem;">
+        <div class="form-group" style="margin: 0;">
+          <label for="history-from">Du</label>
+          <input id="history-from" type="date" class="form-control" [ngModel]="historyFromDate()"
+            (ngModelChange)="historyFromDate.set($event)">
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label for="history-to">Au</label>
+          <input id="history-to" type="date" class="form-control" [ngModel]="historyToDate()"
+            (ngModelChange)="historyToDate.set($event)">
+        </div>
+
+        <div class="form-group" style="margin: 0; display: flex; align-items: end;">
+          <button class="btn-primary" style="width: 100%;" (click)="loadOccupationHistory()">
+            Recalculer
+          </button>
+        </div>
+      </div>
+
+      <div class="occupation-history-grid" *ngIf="occupationHistory() as history; else noHistoryData">
+        <div class="stat-card occupation-history-global">
+          <div class="stat-label">Occupation globale</div>
+          <div class="stat-value">{{ history.globalOccupationRate }}%</div>
+          <div class="text-muted">{{ history.globalOccupiedDeskHours }} h-postes occupées</div>
+          <div class="text-muted">Période : {{ history.fromDate | date:'dd/MM/yyyy' }} → {{ history.toDate |
+            date:'dd/MM/yyyy' }}</div>
+        </div>
+
+        @for (zone of history.zones; track zone.code) {
+        <div class="stat-card">
+          <div class="stat-label">{{ zone.name }}</div>
+          <div class="stat-value">{{ zone.occupationRate }}%</div>
+          <div class="text-muted">{{ zone.occupiedDeskHours }} h-postes occupées</div>
+          <div class="text-muted">Capacité : {{ zone.capacity }} postes</div>
+        </div>
+        }
+      </div>
+
+      <ng-template #noHistoryData>
+        <div class="text-muted">Aucune donnée disponible pour cette période.</div>
+      </ng-template>
+    </section>
+
+    <!-- BOOKINGS TABLE -->
+    <section class="booking-section">
+      <h3 id="table-title">{{ isManagerView() ? 'Flux de réservations du site' : 'Mes réservations (Données temps
+        réelles)' }}</h3>
+
+      <div *ngIf="isManagerView()" class="manager-filters-grid"
+        style="margin-top: 1rem; margin-bottom: 1rem;">
+        <div class="form-group" style="margin: 0;">
+          <label for="manager-filter-user">Utilisateur</label>
+          <input id="manager-filter-user" type="text" class="form-control" [ngModel]="managerFilterUser()"
+            (ngModelChange)="managerFilterUser.set($event); onManagerFiltersChange()" placeholder="Nom ou email">
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label for="manager-filter-status">Statut</label>
+          <select id="manager-filter-status" class="form-control" [ngModel]="managerFilterStatus()"
+            (ngModelChange)="managerFilterStatus.set($event); onManagerFiltersChange()">
+            <option value="ALL">Tous</option>
+            <option value="CONFIRMED">CONFIRMED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label for="manager-filter-from">Du</label>
+          <input id="manager-filter-from" type="date" class="form-control" [ngModel]="managerFilterFromDate()"
+            (ngModelChange)="managerFilterFromDate.set($event); onManagerFiltersChange()">
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label for="manager-filter-to">Au</label>
+          <input id="manager-filter-to" type="date" class="form-control" [ngModel]="managerFilterToDate()"
+            (ngModelChange)="managerFilterToDate.set($event); onManagerFiltersChange()">
+        </div>
+
+        <div class="form-group" style="margin: 0; display: flex; align-items: end;">
+          <button class="toggle-btn" style="width: 100%;" (click)="resetManagerFilters()"
+            aria-label="Réinitialiser les filtres manager">
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+
+      <div class="bookings-table-wrapper">
+      <table class="bookings-table" style="width: 100%; border-collapse: collapse; margin-top: 1rem;" aria-labelledby="table-title">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+            <th *ngIf="isManagerView()" scope="col" style="padding: 1rem;">Utilisateur</th>
+            <th scope="col" style="padding: 1rem; cursor: pointer;" (click)="sortBy('desk')">
+              Poste <span *ngIf="sortColumn() === 'desk'">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th scope="col" style="padding: 1rem; cursor: pointer;" (click)="sortBy('zone')">
+              Zone/Espace <span *ngIf="sortColumn() === 'zone'">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th scope="col" style="padding: 1rem; cursor: pointer;" (click)="sortBy('date')">
+              Date & Heure <span *ngIf="sortColumn() === 'date'">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th scope="col" style="padding: 1rem; cursor: pointer;" (click)="sortBy('price')">
+              Prix <span *ngIf="sortColumn() === 'price'">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th scope="col" style="padding: 1rem; cursor: pointer;" (click)="sortBy('status')">
+              Statut <span *ngIf="sortColumn() === 'status'">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+            </th>
+            <th scope="col" style="padding: 1rem;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of paginatedBookings(); track b.id) {
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td *ngIf="isManagerView()" style="padding: 1rem;">
+              {{ b.user?.firstName }} {{ b.user?.lastName }}<br>
+              <span class="text-muted" style="font-size: 0.75rem;">{{ b.user?.email }}</span>
+            </td>
+            <td style="padding: 1rem;">{{ b.desk.code }}</td>
+            <td style="padding: 1rem;">{{ b.desk.zone.name }}</td>
+            <td style="padding: 1rem;">{{ b.startTime | date:'dd/MM/yyyy HH:mm' }} - {{ b.endTime | date:'HH:mm' }}</td>
+            <td style="padding: 1rem; font-weight: 600;">{{ b.price }} €</td>
+            <td style="padding: 1rem;"><span [ngClass]="b.status === 'CONFIRMED' ? 'badge-success' : 'badge-cancelled'"
+                role="status">{{ b.status }}</span></td>
+            <td class="booking-actions-cell" style="padding: 1rem;">
+              <button (click)="downloadInvoice(b.id)" class="btn-primary"
+                style="padding: 0.4rem 0.8rem; font-size: 0.7rem;"
+                [aria-label]="'Télécharger la facture de la réservation ' + b.id">
+                Facture 📄
+              </button>
+              <button *ngIf="b.status === 'CONFIRMED'" (click)="openEditModal(b)" class="toggle-btn"
+                style="padding: 0.4rem 0.8rem; font-size: 0.7rem; color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4);"
+                [aria-label]="'Modifier la réservation ' + b.id">
+                Modifier
+              </button>
+              <button *ngIf="b.status === 'CONFIRMED'" (click)="cancelReservation(b.id)" class="toggle-btn"
+                style="padding: 0.4rem 0.8rem; font-size: 0.7rem; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);"
+                [aria-label]="'Annuler la réservation ' + b.id">
+                Annuler
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td [attr.colspan]="isManagerView() ? 7 : 6" style="padding: 2rem; text-align: center;" class="text-muted">
+              Aucune réservation trouvée.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      </div>
+
+      <div *ngIf="isManagerView() && totalPages() > 1" class="pagination-bar"
+        style="display: flex; align-items: center; justify-content: end; gap: 0.75rem; margin-top: 1rem;">
+        <button class="toggle-btn" (click)="previousPage()" [disabled]="currentPage() === 1"
+          aria-label="Page précédente">
+          Précédent
+        </button>
+        <span class="text-muted">Page {{ currentPage() }} / {{ totalPages() }}</span>
+        <button class="toggle-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()"
+          aria-label="Page suivante">
+          Suivant
+        </button>
+      </div>
+    </section>
+  </main>
+  }
+
+  <!-- RESERVATION MODAL (Accessible) -->
+  <div id="booking-modal" class="modal-overlay" *ngIf="showModal()" role="dialog" aria-modal="true"
+    aria-labelledby="modal-title">
+    <div class="modal-content">
+      <h2 id="modal-title" style="margin-top: 0;">Réserver un espace</h2>
+      <p class="text-muted" style="margin-bottom: 2rem;">Sélectionnez votre poste en 3 clics.</p>
+
+      <div class="form-group">
+        <label for="desk-select">1. Choisir le poste (Zone)</label>
+        <select id="desk-select" class="form-control" [(ngModel)]="newBooking.deskId">
+          @for (d of availableDesks; track d.id) {
+          <option [value]="d.id">{{ d.code }} - {{ d.zone }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="res-date">2. Date</label>
+        <input id="res-date" type="date" class="form-control" [min]="minDate" [(ngModel)]="newBooking.date">
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label for="res-time">3. Heure de début</label>
+          <input id="res-time" type="time" class="form-control" [(ngModel)]="newBooking.time">
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label for="res-time-end">4. Heure de fin</label>
+          <input id="res-time-end" type="time" class="form-control" [(ngModel)]="newBooking.endTime">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
+        <button class="btn-primary" style="flex: 2;" (click)="confirmReservation()"
+          aria-label="Confirmer la réservation">Confirmer</button>
+        <button class="toggle-btn" style="flex: 1;" (click)="closeModal()"
+          aria-label="Fermer la fenêtre">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT RESERVATION MODAL -->
+  <div id="edit-booking-modal" class="modal-overlay" *ngIf="showEditModal()" role="dialog" aria-modal="true"
+    aria-labelledby="edit-modal-title">
+    <div class="modal-content">
+      <h2 id="edit-modal-title" style="margin-top: 0;">Modifier la réservation</h2>
+      <p class="text-muted" style="margin-bottom: 2rem;">Ajustez le poste ou le créneau horaire.</p>
+
+      <div class="form-group">
+        <label for="edit-desk-select">Poste</label>
+        <select id="edit-desk-select" class="form-control" [(ngModel)]="editBooking.deskId">
+          @for (d of availableDesks; track d.id) {
+          <option [value]="d.id">{{ d.code }} - {{ d.zone }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="edit-res-date">Date</label>
+        <input id="edit-res-date" type="date" class="form-control" [min]="minDate" [(ngModel)]="editBooking.date">
+      </div>
+
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label for="edit-res-time">Heure de début</label>
+          <input id="edit-res-time" type="time" class="form-control" [(ngModel)]="editBooking.time">
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label for="edit-res-time-end">Heure de fin</label>
+          <input id="edit-res-time-end" type="time" class="form-control" [(ngModel)]="editBooking.endTime">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
+        <button class="btn-primary" style="flex: 2;" (click)="confirmBookingUpdate()"
+          aria-label="Confirmer la modification de la réservation">Enregistrer</button>
+        <button class="toggle-btn" style="flex: 1;" (click)="closeEditModal()"
+          aria-label="Fermer la fenêtre de modification">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div id="profile-modal" class="modal-overlay" *ngIf="showProfileModal()" role="dialog" aria-modal="true"
+    aria-labelledby="profile-modal-title">
+    <div class="modal-content">
+      <h2 id="profile-modal-title" style="margin-top: 0;">Modifier mon profil</h2>
+      <p class="text-muted" style="margin-bottom: 2rem;">Mettez à jour vos informations personnelles.</p>
+
+      <div class="form-group">
+        <label for="profile-first-name">Prénom</label>
+        <input id="profile-first-name" type="text" class="form-control" [(ngModel)]="profileForm.firstName">
+      </div>
+
+      <div class="form-group">
+        <label for="profile-last-name">Nom</label>
+        <input id="profile-last-name" type="text" class="form-control" [(ngModel)]="profileForm.lastName">
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
+        <button class="btn-primary" style="flex: 2;" (click)="saveProfile()"
+          aria-label="Enregistrer les modifications du profil">Enregistrer</button>
+        <button class="toggle-btn" style="flex: 1;" (click)="closeProfileModal()"
+          aria-label="Fermer la fenêtre du profil">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
