@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 @Component
@@ -18,8 +20,20 @@ public class JwtUtil {
     @Value("${app.jwt.expiration-ms:43200000}")
     private long expirationMs;
 
+    /**
+     * jjwt exige une clé HMAC d’au moins 256 bits (RFC 7518). Les secrets courts
+     * (ex. valeur par défaut dans application.properties) sont dérivés en SHA-256.
+     */
     private Key getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            try {
+                keyBytes = MessageDigest.getInstance("SHA-256").digest(keyBytes);
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException("SHA-256 non disponible", e);
+            }
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(String email) {

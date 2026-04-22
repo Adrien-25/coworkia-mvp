@@ -70,6 +70,8 @@ Application disponible sur `http://localhost:4200`.
 | `JWT_SECRET` | Oui (cible prod) | `une_cle_longue_et_forte_au_moins_32_chars` |
 | `JWT_EXPIRATION_MS` | Non | `43200000` |
 
+Note JWT : en production, fournir un `JWT_SECRET` d’au moins 32 caractères ; en local, si le secret est trop court, il est dérivé en SHA-256 afin d’obtenir une clé compatible HS256.
+
 Etat actuel :
 - Le projet fonctionne encore en local sans variables grâce à des fallbacks.
 - Objectif de fin de sprint : supprimer les fallbacks sensibles.

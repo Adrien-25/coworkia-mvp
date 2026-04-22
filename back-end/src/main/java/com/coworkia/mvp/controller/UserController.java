@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,12 +26,29 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Réponse JSON dédiée (sans sérialiser toute l'interface UserDetails).
+     */
     @GetMapping("/me")
-    public Optional<User> getMe(Authentication auth) {
-        if (auth != null) {
-            return userRepository.findByEmail(auth.getName());
+    public ResponseEntity<Map<String, Object>> getMe(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return Optional.empty();
+        return userRepository.findByEmail(auth.getName())
+                .map(UserController::toProfileMap)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    private static Map<String, Object> toProfileMap(User u) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", u.getId());
+        m.put("email", u.getEmail());
+        m.put("firstName", u.getFirstName() != null ? u.getFirstName() : "");
+        m.put("lastName", u.getLastName() != null ? u.getLastName() : "");
+        m.put("role", u.getRole().name());
+        m.put("fidelityPoints", u.getFidelityPoints() != null ? u.getFidelityPoints() : 0);
+        return m;
     }
 
     @PutMapping("/me")
