@@ -40,6 +40,12 @@ npm -v
 
 ## Installation et lancement
 
+### 0) Récupération du projet
+```bash
+git clone https://github.com/Adrien-25/coworkia-mvp.git
+cd coworkia-mvp
+```
+
 ### 1) Base de données
 Exécuter les scripts dans cet ordre :
 1. `back-end/scripts/schema.sql`
