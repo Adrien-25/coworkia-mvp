@@ -64,9 +64,9 @@ Application disponible sur `http://localhost:4200`.
 
 | Variable | Obligatoire | Exemple |
 | :--- | :---: | :--- |
-| `DB_URL` | Oui (cible prod) | `jdbc:postgresql://localhost:5432/coworkia` |
+| `DB_URL_COWORKIA` | Oui (cible prod) | `jdbc:postgresql://localhost:5432/coworkia` |
 | `DB_USERNAME` | Oui (cible prod) | `postgres` |
-| `DB_PASSWORD` | Oui (cible prod) | `mot_de_passe` |
+| `DB_PASSWORD` | Oui (cible prod) | `votre_mot_de_passe` |
 | `JWT_SECRET` | Oui (cible prod) | `une_cle_longue_et_forte_au_moins_32_chars` |
 | `JWT_EXPIRATION_MS` | Non | `43200000` |
 
@@ -75,10 +75,11 @@ Note JWT : en production, fournir un `JWT_SECRET` d’au moins 32 caractères ; 
 Etat actuel :
 - Le projet fonctionne encore en local sans variables grâce à des fallbacks.
 - Objectif de fin de sprint : supprimer les fallbacks sensibles.
+- Le fichier `back-end/.env.example` est un gabarit documentaire des variables attendues ; l'application lit les variables d'environnement du système (session shell / OS), pas un fichier `.env` automatiquement.
 
 Exemple PowerShell (session courante) :
 ```powershell
-$env:DB_URL="jdbc:postgresql://localhost:5432/coworkia"
+$env:DB_URL_COWORKIA="jdbc:postgresql://localhost:5432/coworkia"
 $env:DB_USERNAME="postgres"
 $env:DB_PASSWORD="votre_mot_de_passe"
 $env:JWT_SECRET="une_cle_longue_et_forte_au_moins_32_chars"

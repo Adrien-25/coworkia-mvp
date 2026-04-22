@@ -2,7 +2,7 @@
   <a href="#main-content" class="skip-link">Passer au contenu principal</a>
 
   <!-- REGION POUR ANNONCES VOCALES (Lecteurs d'écran) -->
-  <div aria-live="polite" class="sr-only"
+  <div [attr.aria-live]="toastAriaLive()" [attr.role]="toastAriaRole()" aria-atomic="true" class="sr-only"
     style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;">
     {{ toastMessage() }}
   </div>

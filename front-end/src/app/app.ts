@@ -26,6 +26,15 @@ export class AppComponent implements OnInit {
   showEditModal = signal<boolean>(false);
   showProfileModal = signal<boolean>(false);
   toastMessage = signal<string | null>(null);
+  toastAriaRole = computed<'status' | 'alert'>(() => {
+    const message = this.toastMessage();
+    if (!message) return 'status';
+    const normalized = message.trim();
+    return normalized.startsWith('❌') || normalized.startsWith('⚠️') ? 'alert' : 'status';
+  });
+  toastAriaLive = computed<'polite' | 'assertive'>(() =>
+    this.toastAriaRole() === 'alert' ? 'assertive' : 'polite'
+  );
   zones = signal<any[]>([]);
   occupationHistory = signal<any | null>(null);
   userProfile = signal<any>(null);
